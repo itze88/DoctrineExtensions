@@ -1,4 +1,4 @@
-# Some Doctrine 2 Extensions
+    # Some Doctrine 2 Extensions
 
 This package contains several extensions to Doctrine 2 that hook into the facilities of Doctrine and
 offer new functionality or tools to use Doctrine 2 more efficently.
