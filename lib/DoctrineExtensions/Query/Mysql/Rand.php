@@ -23,13 +23,25 @@ class Rand extends FunctionNode
 {
     public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker)
     {
-        return 'RAND()';
+        $sql = 'RAND()';
+        if ( $this->randMax !== null && $this->randMin !== null ) {
+            $sql = '(FLOOR('.$sql.' * (' . $this->randMax->dispatch($sqlWalker) . ' - ' . $this->randMin->dispatch($sqlWalker) . ' + 1)) + ' . $this->randMin->dispatch($sqlWalker) . ')';
+        }
+        return $sql;        
     }
 
     public function parse(\Doctrine\ORM\Query\Parser $parser)
     {
+        $lexer = $parser->getLexer();
+
         $parser->match(Lexer::T_IDENTIFIER);
         $parser->match(Lexer::T_OPEN_PARENTHESIS);
-        $parser->match(Lexer::T_CLOSE_PARENTHESIS);
+        // parse parameters if available
+        if(Lexer::T_INTEGER === $lexer->lookahead['type'] || Lexer::T_FLOAT === $lexer->lookahead['type']){
+            $this->randMin = $parser->ScalarExpression();
+            $parser->match(Lexer::T_COMMA);
+            $this->randMax = $parser->ScalarExpression();
+        }
+        $parser->match(Lexer::T_CLOSE_PARENTHESIS);        
     }
 }
