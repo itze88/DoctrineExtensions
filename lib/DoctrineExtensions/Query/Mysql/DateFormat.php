@@ -1,6 +1,5 @@
 <?php
-
-/*
+/**
  * DoctrineExtensions Mysql Function Pack
  *
  * LICENSE
@@ -14,43 +13,29 @@
 
 namespace DoctrineExtensions\Query\Mysql;
 
-use Doctrine\ORM\Query\Lexer;
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
+use Doctrine\ORM\Query\Lexer;
 
-/**
- * "SHA1" "(" StringPrimary ")"
- *
- * @category    DoctrineExtensions
- * @package     DoctrineExtensions\Query\Mysql
- * @author      Andreas Gallien <gallien@seleos.de>
- * @license     New BSD License
- */
-class Sha1 extends FunctionNode
+class DateFormat extends FunctionNode
 {
-    public $stringPrimary;
+    public $firstDateExpression = null;
+    public $secondDateExpression = null;
 
-    /**
-     * @override
-     */
-    public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker)
-    {
-        return 'SHA1(' .
-            $sqlWalker->walkStringPrimary($this->stringPrimary) .
-        ')';
-    }
-
-    /**
-     * @override
-     */
     public function parse(\Doctrine\ORM\Query\Parser $parser)
     {
-        $lexer = $parser->getLexer();
-
         $parser->match(Lexer::T_IDENTIFIER);
         $parser->match(Lexer::T_OPEN_PARENTHESIS);
-
-        $this->stringPrimary = $parser->StringPrimary();
-
+        $this->firstDateExpression = $parser->ArithmeticPrimary();
+        $parser->match(Lexer::T_COMMA);
+        $this->secondDateExpression = $parser->ArithmeticPrimary();
         $parser->match(Lexer::T_CLOSE_PARENTHESIS);
+    }
+
+    public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker)
+    {
+        return 'DATE_FORMAT(' .
+            $this->firstDateExpression->dispatch($sqlWalker) . ', ' .
+            $this->secondDateExpression->dispatch($sqlWalker) .
+        ')';
     }
 }

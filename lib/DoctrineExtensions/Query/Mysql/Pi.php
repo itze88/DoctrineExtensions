@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * DoctrineExtensions Mysql Function Pack
  *
  * LICENSE
@@ -14,43 +14,28 @@
 
 namespace DoctrineExtensions\Query\Mysql;
 
-use Doctrine\ORM\Query\Lexer;
-use Doctrine\ORM\Query\AST\Functions\FunctionNode;
+use Doctrine\ORM\Query\AST\Functions\FunctionNode,
+    Doctrine\ORM\Query\Lexer;
 
-/**
- * "SHA1" "(" StringPrimary ")"
- *
- * @category    DoctrineExtensions
- * @package     DoctrineExtensions\Query\Mysql
- * @author      Andreas Gallien <gallien@seleos.de>
- * @license     New BSD License
- */
-class Sha1 extends FunctionNode
+class Pi extends FunctionNode
 {
-    public $stringPrimary;
 
-    /**
-     * @override
-     */
+    public $arithmeticExpression;
+
     public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker)
     {
-        return 'SHA1(' .
-            $sqlWalker->walkStringPrimary($this->stringPrimary) .
-        ')';
+
+        return 'PI()';
     }
 
-    /**
-     * @override
-     */
     public function parse(\Doctrine\ORM\Query\Parser $parser)
     {
+
         $lexer = $parser->getLexer();
 
         $parser->match(Lexer::T_IDENTIFIER);
         $parser->match(Lexer::T_OPEN_PARENTHESIS);
-
-        $this->stringPrimary = $parser->StringPrimary();
-
         $parser->match(Lexer::T_CLOSE_PARENTHESIS);
     }
+
 }

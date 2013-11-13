@@ -1,7 +1,7 @@
 <?php
 
 /*
- * DoctrineExtensions Mysql Function Pack
+ * DoctrineExtensions Oracle Function Pack
  *
  * LICENSE
  *
@@ -12,43 +12,34 @@
  * to kontakt@beberlei.de so I can send you a copy immediately.
  */
 
-namespace DoctrineExtensions\Query\Mysql;
+namespace DoctrineExtensions\Query\Oracle;
 
-use Doctrine\ORM\Query\Lexer;
-use Doctrine\ORM\Query\AST\Functions\FunctionNode;
+use Doctrine\ORM\Query\Lexer,
+    Doctrine\ORM\Query\AST\Functions\FunctionNode;
 
 /**
- * "YEAR" "(" SimpleArithmeticExpression ")"
+ * Usage: MONTH(date)
  *
- * @category    DoctrineExtensions
- * @package     DoctrineExtensions\Query\Mysql
- * @author      Rafael Kassner <kassner@gmail.com>
- * @license     MIT License
+ * Returns the month of a given date using the Oracle's EXTRACT function
+ *
+ * @author  Andréia Bohner <andreiabohner@gmail.com>
  */
-class Year extends FunctionNode
+class Month extends FunctionNode
 {
-    public $date;
+    private $date;
 
-    /**
-     * @override
-     */
     public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker)
     {
-        return "YEAR(" . $sqlWalker->walkArithmeticPrimary($this->date) . ")";
+        return sprintf(
+                'EXTRACT(MONTH FROM %s)',
+                $sqlWalker->walkArithmeticPrimary($this->date));
     }
 
-    /**
-     * @override
-     */
     public function parse(\Doctrine\ORM\Query\Parser $parser)
     {
-        $lexer = $parser->getLexer();
-
         $parser->match(Lexer::T_IDENTIFIER);
         $parser->match(Lexer::T_OPEN_PARENTHESIS);
-
         $this->date = $parser->ArithmeticPrimary();
-
         $parser->match(Lexer::T_CLOSE_PARENTHESIS);
     }
 }

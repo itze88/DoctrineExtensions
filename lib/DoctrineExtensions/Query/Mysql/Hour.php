@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * DoctrineExtensions Mysql Function Pack
  *
  * LICENSE
@@ -18,29 +18,27 @@ use Doctrine\ORM\Query\Lexer;
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
 
 /**
- * "SHA2" "(" StringPrimary "," SimpleArithmeticExpression ")"
+ * "HOUR" "(" SimpleArithmeticExpression ")".
+ * Modified from DoctrineExtensions\Query\Mysql\Year
+ *
+ * More info:
+ * http://dev.mysql.com/doc/refman/5.5/en/date-and-time-functions.html#function_hour
  *
  * @category    DoctrineExtensions
  * @package     DoctrineExtensions\Query\Mysql
- * @author      Andreas Gallien <gallien@seleos.de>
- * @license     New BSD License
+ * @author      Dawid Nowak <macdada@mmg.pl>
+ * @license     MIT License
  */
-class Sha2 extends FunctionNode
+class Hour extends FunctionNode
 {
-    public $stringPrimary;
-
-    public $simpleArithmeticExpression;
+    public $date;
 
     /**
      * @override
      */
     public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker)
     {
-        return 'SHA2(' .
-            $sqlWalker->walkStringPrimary($this->stringPrimary) .
-            ',' .
-            $sqlWalker->walkSimpleArithmeticExpression($this->simpleArithmeticExpression) .
-        ')';
+        return 'HOUR('.$sqlWalker->walkArithmeticPrimary($this->date).')';
     }
 
     /**
@@ -48,14 +46,10 @@ class Sha2 extends FunctionNode
      */
     public function parse(\Doctrine\ORM\Query\Parser $parser)
     {
-        $lexer = $parser->getLexer();
-
         $parser->match(Lexer::T_IDENTIFIER);
         $parser->match(Lexer::T_OPEN_PARENTHESIS);
 
-        $this->stringPrimary = $parser->StringPrimary();
-        $parser->match(Lexer::T_COMMA);
-        $this->simpleArithmeticExpression = $parser->SimpleArithmeticExpression();
+        $this->date = $parser->ArithmeticPrimary();
 
         $parser->match(Lexer::T_CLOSE_PARENTHESIS);
     }
