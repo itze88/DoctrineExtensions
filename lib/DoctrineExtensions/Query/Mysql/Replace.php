@@ -1,5 +1,4 @@
 <?php
-
 /**
  * DoctrineExtensions Mysql Function Pack
  */
